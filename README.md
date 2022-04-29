@@ -4,6 +4,7 @@
 | ---         | ---     |   --- |  ---     |
 | linux(apt)  |    -    |   -   | curl jq  |
 | aws-cli     | v2.0.x  |https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html | - |
+| aws-iam-authenticator   | v0.5.0  |https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html | - |
 | eksctl      | v0.91.x |https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html | - |
 | helm        | v3.7.x: |https://helm.sh/docs/intro/install/ | - |
 | kubectl     |client(1.22) - server(1.19)| https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/ | - |
@@ -19,10 +20,12 @@
 - I prefere deploy all in my cluster to mantain Git like a Single Source of true (git), and then saparated my code of my real environments. If you loss your environment, its not affect your code  ;) 
 
 
+
 <br><br>
 
 # Personal recommendation    ;) 
 - You can build your own docker container with all "Prerequisites" to avoid install it for all employees. After build they can pull this container and work all with the same environment.
+- For test, try to use SPOT instances, it's more cheap!!!
 
 <br><br><br><br>
 
@@ -102,7 +105,7 @@ aws --profile MyProfile iam create-policy --policy-name AWSLoadBalancerControlle
 
 ### Create a serviceAccount (to manage permissions in the cluster )
 <pre>
-  eksctl --profile MyProfile create iamserviceaccount --cluster=$(terraform output cluster-name|jq -r .) --namespace=kube-system --name=aws-load-balancer- controller --attach-policy-arn=arn:aws:iam::689693960256:policy/AWSLoadBalancerControllerIAMPolicy --override-existing-serviceaccounts --region   $(terraform output region|jq -r .) --approve
+  eksctl --profile MyProfile create iamserviceaccount --cluster=$(terraform output cluster-name|jq -r .) --namespace=kube-system --name=aws-load-balancer- controller --attach-policy-arn=arn:aws:iam::9999999999:policy/AWSLoadBalancerControllerIAMPolicy --override-existing-serviceaccounts --region   $(terraform output region|jq -r .) --approve
   	[ℹ]  eksctl version 0.91.0
   	[ℹ]  using region us-west-1
   	[ℹ]  1 existing iamserviceaccount(s) (kube-system/aws-load-balancer-controller) will be excluded
@@ -142,15 +145,15 @@ aws --profile MyProfile iam create-policy --policy-name AWSLoadBalancerControlle
 	kubectl create namespace jenkins-demo
 
 ### Get last values
-	helm show values jenkinsci/jenkins > 99-cicd/jenkins-k8s.yaml
+	helm show values jenkinsci/jenkins > 03-cicd/jenkins-k8s.yaml
 
 ### Edit and deploy jenkins
-	helm -n jenkins-demo install jenkins jenkinsci/jenkins -f 99-cicd/jenkins-k8s.yaml
+	helm -n jenkins-demo install jenkins jenkinsci/jenkins -f 03-cicd/jenkins-k8s.yaml
 
 ### Get secret access (wait to pod finish and start)
 	kubectl exec -n jenkins-demo jenkins-demo -it svc/jenkins -c jenkins -- /bin/cat /run/secrets/chart-admin-password && echo
 
-### Forward port (for this test I use forward, but I could use a LoadBalancer to expose this service )
+### Forward port (for this test I use port-forward, but I could use a Load Balancer to expose this service)
 	kubectl -n jenkins-demo port-forward svc/jenkins 8080:8080
 
 ### To delete all
@@ -187,7 +190,10 @@ aws --profile MyProfile iam create-policy --policy-name AWSLoadBalancerControlle
 
 
 
-<br><br><br><br><br>
+<br><br><br>
+<img src="others/diagram.jpg">
+
+<br><br><br>
 
 
 
