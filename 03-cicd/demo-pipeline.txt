@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('00-base-config') {
+            steps {
+                // requiere que el job tenga configurado el "This project is parameterized"
+                sh ' echo "You select clone $source branch" '
+            }
+        }
+        stage('01-CloneRepo') {
+            steps {
+                // requiere que el job tenga configurado el "This project is parameterized"
+                git branch: '$source', url: 'https://github.com/jpradoar/demo-tf.git'
+            }
+        }
+        stage('02-see-file') {
+            steps {
+                sh 'ls -lha /home/jenkins/agent/workspace/demov1/'
+            }
+        }
+        stage('03-build') {
+            steps {
+		// requiere docker, y en los pods no viene default asi que va a fallar, pero para la demo esta ok. 
+                sh 'docker build -t asd https://raw.githubusercontent.com/jpradoar/demo-tf/app-dev/apps/Dockerfile '
+            }
+        }         
+    }
+}
+
