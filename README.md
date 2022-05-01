@@ -1,6 +1,7 @@
 
 # Terraform + Kubernetes + Jenkins  (PoC)
 
+<br><hr><br>
 
 ## Objetive
  - Create a simple and fast environment to work with a generic life cycle.. 
@@ -8,6 +9,7 @@
  - Deploy a kubernetes cluster (eks) in AWS, to use as a base work environment.
  - Deploy Jenkins with minimun configs to start working.
 
+<br><hr><br>
 
 ## Prerequisites
 |name         | version | url   | obs      |
@@ -16,28 +18,27 @@
 | aws-cli     | v2.0.x  |https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html | - |
 | aws-iam-authenticator   | v0.5.0  |https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html | - |
 | eksctl      | v0.91.x |https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html | - |
-| helm        | v3.7.x: |https://helm.sh/docs/intro/install/ | - |
-| kubectl     |client(1.22) - server(1.19)| https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/ | - |
+| helm        | v3.7.x  |https://helm.sh/docs/intro/install/ | - |
+| kubectl     |client(1.22)  server(1.19) | https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/ | - |
 | terraform   | v1.1.9  |https://learn.hashicorp.com/tutorials/terraform/install-cli | - |
 | Python      | v3.7.x  |   -   | Optional |
 | Docker      | v20.10.x|   -   | Optional |
 
+<br><hr><br>
 
 ## Disclaimer
-- This is a demo of how to deploy a bassic kubernetes cluster in aws and using Terraform and Helm to deploy a Jenkins server.
+- This is a demo of how to deploy a bassic kubernetes cluster in aws using Terraform and Helm to deploy a Jenkins server.
 - This is the first and minimun version ( a PoC )
 - Security aspect were not taken into account
-- I prefere deploy all in my cluster to mantain Git like a Single Source of true (git), and then saparated my code of my real environments. If you loss your environment, its not affect your code  ;) 
+- I prefer deploy all in my cluster to maintain Git like a Single Source of truth (SSoT), and maintain separate my code of my real environments. Of I loss my environment, its not affect (loss) my code too  ;) 
 
-
-
-<br><br>
+<br>
 
 ## Personal recommendation    ;) 
 - You can build your own docker container with all "Prerequisites" to avoid install it for all employees. After build they can pull this container and work all with the same environment.
-- For test, try to use SPOT instances, it's more cheap!!!
+- For test, try to use SPOT instances, it's cheaper!!!
 
-<br>
+<br><hr><br>
 
 ## Design
 
@@ -45,7 +46,11 @@
 <br>
 
 
-<br><br><br>
+<br><hr><br><br>
+
+# Deploy
+
+<br>
 
 ### Configure your aws-cli
 
@@ -85,6 +90,8 @@ kubectl get ns
 	kube-system       Active   11m
 </pre>
 
+
+<br><hr><br>
 
 # Ingress Controller and ALBs for aws  (to manage LBs from kubernetes )
 
@@ -152,6 +159,7 @@ aws --profile MyProfile iam create-policy --policy-name AWSLoadBalancerControlle
 
 
 
+<br><hr><br>
 
 # CICD
 
@@ -178,38 +186,48 @@ aws --profile MyProfile iam create-policy --policy-name AWSLoadBalancerControlle
 
 
 
-<br><br>
+<br><hr><br>
 
 
-# Registry
+## Registry
 
 <pre>
   ### vars
   GROUP=devops
   registry-endpoint=999999999.dkr.ecr.$region.amazonaws.com
+</pre>
 
 ### Login with you actual user (need to have   .aws/config and .aws/secrets )
+<pre>
   aws ecr get-login-password --region $(terraform output cluster-name|jq -r .) | docker login --username AWS --password-stdin $registry-endpoint
+</pre>
 
 ###  Crear repo
+<pre>
   aws ecr create-repository --repository-name $GROUP/[nombre_de_tu_nueva_imagen] --image-scanning-configuration scanOnPush=true --region $region
+</pre>
 
 ###  Taggear la nueva imagen
+<pre>
   docker tag [imagen_original_buildeada] $registry-endpoint/$GROUP/[nombre_de_tu_nueva_imagen]:[TAG]
+</pre>
 
 ###  Pushear
+<pre>
   docker push $registry-endpoint/$GROUP/[nombre_de_tu_nueva_imagen]
 </pre>
 
 
+<br><hr><br>
 
 ### Terraform code design
 <pre>
-For this example you can change variables.tf,  this vars was used to generate a custom names for al resources.
-This idea is to understand what resources are part of same deploy and to use like "easy human frendly read" instead use only objects ID.
+For this example you can change and use your oun vars in variables.tf.
+This vars file was used to avoid modify all code and generate a custom names for al resources.
+(Used like "easy human frendly read" instead of using only objects ID).
 
-For example, you can see VPC Name, its a compound word (or "compound name"). And the same for Subnet Names.
-This is super usefull when you have some resources in the same location.
+For example, you can see "VPC Name", its a compound word (or "compound name"). And the same for Subnet Names.
+This is super usefull when you have some resources in the same location to different environments or projects.
 
 VPC name example:
 	vpc.tf#L18   ==  variables.tf#L18 + variables.tf#L8
@@ -220,24 +238,23 @@ Subnet name example:
 </pre>
 
 <div align="center"> 
-	<img src="vpc.png">
-	<br>
-	<img src="subnets.png">
-	<br>
-	<img src="internet-gw.png">
-	<br>
-	<img src="eks.png">
-	<br>
-	<img src="worker-nodes.png">
-	<br>
-	<img src="autoscaling.png">
-	<br>
-	<img src="ecr.png">
-	<br>
+	<img src="others/vpc.png">
+	<br><hr><br>
+	<img src="others/subnets.png">
+	<br><hr><br>
+	<img src="others/internet-gw.png">
+	<br><hr><br>
+	<img src="others/eks.png">
+	<br><hr><br>
+	<img src="others/worker-nodes.png">
+	<br><hr><br>
+	<img src="others/autoscaling.png">
+	<br><hr><br>
+	<img src="others/ecr.png">
+	<br><hr><br>
 </div>
 
-<br><br><br><br>
-
+<br><br><hr><br><br>
 
 
 
