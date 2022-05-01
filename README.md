@@ -1,5 +1,15 @@
 
-# Prerequisites
+# Terraform + Kubernetes + Jenkins  (PoC)
+
+
+## Objetive
+ - Create a simple and fast environment to work with a generic life cycle.. 
+ - Deploy base infra with Terraform  (VPC, Subnet, SG, EKS, ECR).
+ - Deploy a kubernetes cluster (eks) in AWS, to use as a base work environment.
+ - Deploy Jenkins with minimun configs to start working.
+
+
+## Prerequisites
 |name         | version | url   | obs      |
 | ---         | ---     |   --- |  ---     |
 | linux(apt)  |    -    |   -   | curl jq  |
@@ -13,7 +23,7 @@
 | Docker      | v20.10.x|   -   | Optional |
 
 
-# Disclaimer
+## Disclaimer
 - This is a demo of how to deploy a bassic kubernetes cluster in aws and using Terraform and Helm to deploy a Jenkins server.
 - This is the first and minimun version ( a PoC )
 - Security aspect were not taken into account
@@ -23,12 +33,19 @@
 
 <br><br>
 
-# Personal recommendation    ;) 
+## Personal recommendation    ;) 
 - You can build your own docker container with all "Prerequisites" to avoid install it for all employees. After build they can pull this container and work all with the same environment.
 - For test, try to use SPOT instances, it's more cheap!!!
 
-<br><br><br><br>
+<br>
 
+## Design
+
+<img src="others/diagram.jpg">
+<br>
+
+
+<br><br><br>
 
 ### Configure your aws-cli
 
@@ -186,14 +203,40 @@ aws --profile MyProfile iam create-policy --policy-name AWSLoadBalancerControlle
 
 
 
+### Terraform code design
+<pre>
+For this example you can change variables.tf,  this vars was used to generate a custom names for al resources.
+This idea is to understand what resources are part of same deploy and to use like "easy human frendly read" instead use only objects ID.
 
+For example, you can see VPC Name, its a compound word (or "compound name"). And the same for Subnet Names.
+This is super usefull when you have some resources in the same location.
 
+VPC name example:
+	vpc.tf#L18   ==  variables.tf#L18 + variables.tf#L8
 
+Subnet name example:
+	vpc.tf#L18 ==  vpc.tf#L24 + variables.tf#L18 + variables.tf#L8
 
-<br><br><br>
-<img src="others/diagram.jpg">
+</pre>
 
-<br><br><br>
+<div align="center"> 
+	<img src="vpc.png">
+	<br>
+	<img src="subnets.png">
+	<br>
+	<img src="internet-gw.png">
+	<br>
+	<img src="eks.png">
+	<br>
+	<img src="worker-nodes.png">
+	<br>
+	<img src="autoscaling.png">
+	<br>
+	<img src="ecr.png">
+	<br>
+</div>
+
+<br><br><br><br>
 
 
 
@@ -205,6 +248,7 @@ https://docs.aws.amazon.com/es_es/eks/latest/userguide/enable-iam-roles-for-serv
 https://docs.aws.amazon.com/eks/latest/userguide/service_IAM_role.html
 https://docs.aws.amazon.com/es_es/vpc/latest/userguide/vpc-dns.html
 https://registry.terraform.io/
+https://plugins.jenkins.io/
 </pre>
 
 
